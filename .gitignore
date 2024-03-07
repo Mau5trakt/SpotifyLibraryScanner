@@ -1,0 +1,7 @@
+/tkns.py
+/*.sqlite
+/.*db
+/music.db
+/.cache
+/count.py
+/az.py
