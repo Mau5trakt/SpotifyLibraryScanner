@@ -70,8 +70,7 @@ def add_album_songs():
     pbar = tqdm(total=cuantity)
     logging.disable()
     while counter < cuantity:
-        print(
-            f"Album: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["name"]}  Artista: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["artists"][0]['name']} Id: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"]}")
+        #print(f"Album: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["name"]}  Artista: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["artists"][0]['name']} Id: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"]}")
 
         query = db.execute("SELECT COUNT(album_id) AS qty FROM albums where album_id = ?",
                            sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"])[0]['qty']
