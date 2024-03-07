@@ -47,7 +47,7 @@ def redirect_page():
     # save the token info in the session
     session[TOKEN_INFO] = token_info
     # redirect the user to the albmus route
-    return redirect(url_for('albums', _external=True))
+    return redirect(url_for('show_home', _external=True))
 
 
 @app.route('/addAlbumsSongs')
@@ -59,6 +59,37 @@ def add_album_songs():
         return redirect("/")
     logging.disable()
     sp = spotipy.Spotify(auth=token_info['access_token'], requests_timeout=15)
+    # get the albums of a user
+
+    albums = sp.current_user_saved_albums()
+
+    counter = 0
+
+    cuantity = albums['total']
+
+    pbar = tqdm(total=cuantity)
+    logging.disable()
+    while counter < cuantity:
+        print(
+            f"Album: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["name"]}  Artista: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["artists"][0]['name']} Id: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"]}")
+
+        query = db.execute("SELECT COUNT(album_id) AS qty FROM albums where album_id = ?",
+                           sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"])[0]['qty']
+
+        if query == 0:
+            db.execute("INSERT INTO albums(album_id, album_name, album_artist_name) VALUES(?,?,?)",
+                       sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"],
+                       sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["name"],
+                       sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["artists"][0][
+                           'name'])
+            print("Insertion Made")
+
+        counter += 1
+        pbar.update(1)
+
+    pbar.close()
+
+
 
     albums = db.execute("SELECT album_id, album_artist_name from albums")
     for a in tqdm(albums):
@@ -170,46 +201,6 @@ def liked_songs():
     pbar.close()
     return render_template("liked.html")
 
-
-@app.route('/userAlbums')
-def albums():
-    try:
-        token_info = get_token()
-    except:
-        print("User not logged in")
-        return redirect("/")
-
-    sp = spotipy.Spotify(auth=token_info['access_token'])
-    # get the albums of a user
-
-    albums = sp.current_user_saved_albums()
-
-    counter = 0
-
-    cuantity = albums['total']
-
-    pbar = tqdm(total=cuantity)
-    logging.disable()
-    while counter < cuantity:
-        print(f"Album: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["name"]}  Artista: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["artists"][0]['name']} Id: {sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"]}")
-
-        query = db.execute("SELECT COUNT(album_id) AS qty FROM albums where album_id = ?",
-                           sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"])[0]['qty']
-
-        if query == 0:
-            db.execute("INSERT INTO albums(album_id, album_name, album_artist_name) VALUES(?,?,?)",
-                       sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["id"],
-                       sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["name"],
-                       sp.current_user_saved_albums(limit=1, offset=counter)['items'][0]["album"]["artists"][0][
-                           'name'])
-            print("Insertion Made")
-
-        counter += 1
-        pbar.update(1)
-
-    pbar.close()
-
-    return "Albums"
 
 
 # function to get the token info from the session
