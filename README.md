@@ -1,6 +1,6 @@
 # Getting Started
 
-Create a file in the same level than `app.py` and call it `tkns.py` in this file you need to have the followings variables from [Spotify Developers Dashboard](http://example.com/ "Title") for the authentication:
+Create a file in the same level than `app.py` and call it `tkns.py` in this file you need to have the followings variables from [Spotify Developers Dashboard](https://developer.spotify.com/ "Title") for the authentication:
 - `client_id="YOUR_CLIENT_ID"`
 - `client_id="YOUR_CLIENT SECRET"`
 
